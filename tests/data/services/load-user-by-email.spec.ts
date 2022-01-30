@@ -34,12 +34,19 @@ describe('DbLoadUserByEmail usecase', () => {
   it('should return an user on success', async () => {
     const expected = await sut.perform(email)
 
-    expect(userRepository.loadByEmail).toHaveBeenCalledTimes(1)
     expect(expected).toStrictEqual({
       id: 1,
       name: 'any_name',
       email: email.email
     })
+  })
+
+  it('should return undefined when user nonexist', async () => {
+    userRepository.loadByEmail.mockResolvedValue(undefined)
+
+    const expected = await sut.perform(email)
+
+    expect(expected).toBeUndefined()
   })
 
   it('should throws if loadByEmail throw', async () => {

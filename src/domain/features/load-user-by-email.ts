@@ -1,4 +1,3 @@
-import { UserNotFoundError } from './../errors/user-not-found'
 import { User } from '../models/user'
 
 export interface LoadUserByEmail {
@@ -10,5 +9,5 @@ export namespace LoadUserByEmail {
     email: string
   }
 
-  export type Result = User | UserNotFoundError
+  export type Result = User | undefined
 }

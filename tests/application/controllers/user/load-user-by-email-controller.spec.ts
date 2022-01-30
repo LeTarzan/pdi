@@ -1,4 +1,4 @@
-import { notFound, ok } from './../../../../src/application/helpers/http';
+import { notFound, ok, serverError } from '../../../../src/application/helpers/http';
 import { LoadUserByEmailController } from '../../../../src/application/controllers/user'
 import { MockProxy, mock } from 'jest-mock-extended'
 import { UserNotFoundError } from '../../../../src/application/errors/user-not-found'
@@ -44,5 +44,13 @@ describe('LoadUserByEmailController', () => {
     const result = await sut.handle(email)
 
     expect(result).toStrictEqual(ok(USER))
+  })
+
+  it('should return 500 if loadUserByEmail throws', async () => {
+    loadUserByEmail.perform.mockRejectedValueOnce(new Error('any_error'))
+
+    const result = await sut.handle(email)
+
+    expect(result).toStrictEqual(serverError(new Error('any_error')))
   })
 })

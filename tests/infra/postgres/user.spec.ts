@@ -7,6 +7,14 @@ import { IBackup } from 'pg-mem'
 import { makeFakeDb } from './config'
 import { RedisRepositoy } from '../../data/contracts'
 
+const VALID_EMAIL = 'valid_email@mail.com'
+
+const EXPECTED_RESULT = {
+  id: 1,
+  name: 'valid_name',
+  email: VALID_EMAIL
+}
+
 describe('PgUserRepository', () => {
   describe('loadByEmail', () => {
     let sut: PgUserRepository
@@ -14,14 +22,6 @@ describe('PgUserRepository', () => {
     let backup: IBackup
     let cache: MockProxy<RedisRepositoy>
 
-    const email = {
-      email: 'valid_email@mail.com'
-    }
-    const EXPECTED_RESULT = {
-      id: 1,
-      name: 'valid_name',
-      email: email.email
-    }
 
     beforeAll(async () => {
       const db = await makeFakeDb([PgUser])
@@ -40,24 +40,24 @@ describe('PgUserRepository', () => {
     })
 
     it.each([
-      [email, null, EXPECTED_RESULT],
-      [email, EXPECTED_RESULT, EXPECTED_RESULT]
+      [VALID_EMAIL, null, EXPECTED_RESULT],
+      [VALID_EMAIL, EXPECTED_RESULT, EXPECTED_RESULT]
     ])(
       'when email is %s and the cache is %o, should returns %o',
-      async (input, cacheResult, expectedResult) => {
+      async (email, cacheResult, expectedResult) => {
         await pgUserRepo.save({
           name: 'valid_name',
-          email: email.email
+          email
         })
         cache.get.mockResolvedValueOnce(cacheResult)
 
-        const user = await sut.loadByEmail(input)
+        const user = await sut.loadByEmail({ email })
 
         expect(user).toStrictEqual(expectedResult)
       })
 
     it('should return undefined user\'s email not exists', async () => {
-      const user = await sut.loadByEmail(email)
+      const user = await sut.loadByEmail({ email: VALID_EMAIL })
 
       expect(user).toBeUndefined()
     })

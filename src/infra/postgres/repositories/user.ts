@@ -7,15 +7,16 @@ type LoadResult = LoadUserByEmailRepository.Result
 type LoadParams = LoadUserByEmailRepository.Params
 
 export class PgUserRepository extends PgRepository implements LoadUserByEmailRepository {
-  private readonly pgUserRepo = this.getRepository(PgUser)
-  private readonly cache = new RedisRepository()
 
   async loadByEmail ({ email }: LoadParams): Promise<LoadResult> {
-    const cachedUser = await this.cache.get<LoadResult>({ key: email })
+    const cache = new RedisRepository()
+    const pgUserRepo = await this.getRepository(PgUser)
+
+    const cachedUser = await cache.get<LoadResult>({ key: email })
 
     if (cachedUser != null) return cachedUser
 
-    const pgUser = await this.pgUserRepo.findOne({ email: email })
+    const pgUser = await pgUserRepo.findOne({ email })
 
     if (pgUser != null) {
       const user = {
@@ -24,7 +25,7 @@ export class PgUserRepository extends PgRepository implements LoadUserByEmailRep
         email: pgUser.email
       }
 
-      await this.cache.set({ key: 'email', value: user })
+      await cache.set({ key: 'email', value: user })
 
       return user
     }

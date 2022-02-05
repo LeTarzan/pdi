@@ -2,6 +2,7 @@ import {
   Connection,
   createConnection,
   getConnection,
+  getRepository,
   getConnectionManager, ObjectType, Repository
 } from 'typeorm'
 
@@ -17,9 +18,9 @@ export class PgConnection {
 
   async connect (): Promise<void> {
     this.connection =
-      getConnectionManager().has('default')
-        ? getConnection()
-        : await createConnection()
+    getConnectionManager().has('default')
+    ? getConnection()
+    : await createConnection()
   }
 
   async disconnect (): Promise<void> {
@@ -30,6 +31,6 @@ export class PgConnection {
   }
 
   getRepository<Entity>(entity: ObjectType<Entity>): Repository<Entity> {
-    return getConnection().getRepository(entity)
+    return getRepository(entity)
   }
 }

@@ -1,13 +1,23 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity()
+@Entity({ name: 'users' })
 export class PgUser {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+  })
   id!: number
 
-  @Column()
+  @Column(
+    {
+        length: 100
+    }
+  )
   name!: string
 
-  @Column()
+  @Column(
+    {
+        length: 100
+    }
+  )
   email!: string
 }

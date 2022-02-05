@@ -1,4 +1,4 @@
-import { env } from './../../main/env'
+import { env } from '../../main/config/env'
 import Redis from 'ioredis'
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class

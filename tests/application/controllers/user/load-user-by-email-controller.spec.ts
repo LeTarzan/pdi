@@ -4,8 +4,10 @@ import { MockProxy, mock } from 'jest-mock-extended'
 import { UserNotFoundError } from '../../../../src/application/errors/user-not-found'
 import { LoadUserByEmail } from '../../../domain/features/load-user-by-email'
 
-const email = {
-  email: 'any_email@mail.com'
+const httpRequest = {
+  params: {
+    email: 'any_email@mail.com'
+  }
 }
 
 const USER = {
@@ -26,22 +28,22 @@ describe('LoadUserByEmailController', () => {
   })
 
   it('should LoadUserByEmail with correct params', async () => {
-    await sut.handle(email)
+    await sut.handle(httpRequest)
 
-    expect(loadUserByEmail.perform).toHaveBeenCalledWith(email)
+    expect(loadUserByEmail.perform).toHaveBeenCalledWith({ email: USER.email })
     expect(loadUserByEmail.perform).toHaveBeenCalledTimes(1)
   })
 
   it('should return 404 if loadUserByEmail returns undefined', async () => {
     loadUserByEmail.perform.mockResolvedValueOnce(undefined)
 
-    const result = await sut.handle(email)
+    const result = await sut.handle(httpRequest)
 
     expect(result).toStrictEqual(notFound(new UserNotFoundError()))
   })
 
   it('should return 200 if loadUserByEmail returns an unser', async () => {
-    const result = await sut.handle(email)
+    const result = await sut.handle(httpRequest)
 
     expect(result).toStrictEqual(ok(USER))
   })
@@ -49,7 +51,7 @@ describe('LoadUserByEmailController', () => {
   it('should return 500 if loadUserByEmail throws', async () => {
     loadUserByEmail.perform.mockRejectedValueOnce(new Error('any_error'))
 
-    const result = await sut.handle(email)
+    const result = await sut.handle(httpRequest)
 
     expect(result).toStrictEqual(serverError(new Error('any_error')))
   })

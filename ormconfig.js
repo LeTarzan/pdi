@@ -1,5 +1,5 @@
 const generatePath = (path) => {
-  return `${process.env.NODE_ENV === 'development' ? 'src' : 'dist' }/${path}.{js,ts}`
+  return `${process.env.NODE_ENV === 'development' ? 'src' : 'dist'}/${path}.{js,ts}`
 }
 
 module.exports = {

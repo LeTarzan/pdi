@@ -8,6 +8,8 @@
     "start": "node -r dotenv/config dist/main",
     "dev": "nodemon --watch 'src/' --exec 'ts-node src/main' -e ts",
     "up": "npm run build && docker-compose up -d --build",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
     "down": "docker-compose down",
     "up:redis": "docker-compose up -d redis",
     "test": "npm run up:redis && jest --runInBand --passWithNoTests --silent --noStackTrace --forceExit",

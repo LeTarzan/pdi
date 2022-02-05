@@ -1,8 +1,8 @@
-import { notFound, ok, serverError } from './../../helpers/http';
-import { UserNotFoundError } from '../../errors/user-not-found';
-import { LoadUserByEmail } from '../../../domain/features/load-user-by-email';
-import { HttpRequest, HttpResponse } from '../../protocols/http';
-import { Controller } from '../../protocols/controller';
+import { notFound, ok, serverError } from './../../helpers/http'
+import { UserNotFoundError } from '../../errors/user-not-found'
+import { LoadUserByEmail } from '../../../domain/features/load-user-by-email'
+import { HttpRequest, HttpResponse } from '../../protocols/http'
+import { Controller } from '../../protocols/controller'
 
 export class LoadUserByEmailController implements Controller {
   constructor (
@@ -13,7 +13,7 @@ export class LoadUserByEmailController implements Controller {
     try {
       const user = await this.loadUserByEmail.perform({ email: httpRequest.params.email })
 
-      if(!user) {
+      if (!user) {
         return notFound(new UserNotFoundError())
       }
 

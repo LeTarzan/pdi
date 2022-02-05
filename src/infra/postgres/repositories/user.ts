@@ -7,7 +7,6 @@ type LoadResult = LoadUserByEmailRepository.Result
 type LoadParams = LoadUserByEmailRepository.Params
 
 export class PgUserRepository extends PgRepository implements LoadUserByEmailRepository {
-
   async loadByEmail ({ email }: LoadParams): Promise<LoadResult> {
     const cache = new RedisRepository()
     const pgUserRepo = await this.getRepository(PgUser)

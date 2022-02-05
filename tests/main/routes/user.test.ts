@@ -1,10 +1,10 @@
-import { PgConnection } from './../../../src/infra/postgres/helpers/connection';
-import { Repository, getConnection, getRepository } from 'typeorm';
-import { PgUser } from './../../../src/infra/postgres/entities/user';
+import { PgConnection } from './../../../src/infra/postgres/helpers/connection'
+import { Repository } from 'typeorm'
+import { PgUser } from './../../../src/infra/postgres/entities/user'
 import request from 'supertest'
 import { app } from '../../../src/main/config/app'
 import { makeFakeDb } from '../../infra/postgres/config'
-import { IBackup } from 'pg-mem';
+import { IBackup } from 'pg-mem'
 
 describe('GET /user/load-by-email/:email', () => {
   let backup: IBackup
@@ -26,20 +26,21 @@ describe('GET /user/load-by-email/:email', () => {
     backup.restore()
   })
 
-  it('should return 404 on load', () => {
-    request(app)
-    .get('/user/load-by-email/any_email@mail.com')
-    .expect(404)
+  it('should return 404 on load', async () => {
+    const { status } = await request(app)
+      .get('/user/load-by-email/any_email@mail.com')
+
+    expect(status).toBe(404)
   })
 
   it('should return 200 on load', async () => {
-    pgUserRepo.save({
+    await pgUserRepo.save({
       name: 'valid_name',
-      email: 'valid_email@mail.com',
+      email: 'valid_email@mail.com'
     })
 
     const { status, body } = await request(app)
-    .get('/user/load-by-email/valid_email@mail.com')
+      .get('/user/load-by-email/valid_email@mail.com')
 
     expect(status).toBe(200)
     expect(body).toEqual({

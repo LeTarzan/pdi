@@ -22,7 +22,6 @@ describe('PgUserRepository', () => {
     let backup: IBackup
     let cache: MockProxy<RedisRepositoy>
 
-
     beforeAll(async () => {
       const db = await makeFakeDb([PgUser])
       backup = db.backup()

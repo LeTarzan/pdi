@@ -1,4 +1,4 @@
-import { notFound, ok, serverError } from '../../../../src/application/helpers/http';
+import { notFound, ok, serverError } from '../../../../src/application/helpers/http'
 import { LoadUserByEmailController } from '../../../../src/application/controllers/user'
 import { MockProxy, mock } from 'jest-mock-extended'
 import { UserNotFoundError } from '../../../../src/application/errors/user-not-found'

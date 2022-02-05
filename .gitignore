@@ -1,4 +1,6 @@
 node_modules
 dist
 coverage
-config
+config-redis
+config-postgres
+.env

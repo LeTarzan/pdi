@@ -1,16 +1,31 @@
 version: '3.7'
 
 services:
-  app: 
+  app:
     build: .
+    container_name: app
     ports:
       - '3000:3000'
     volumes:
       - ./dist:/app/dist
   redis:
+    container_name: redis
     image: redis:latest
     ports:
       - 6379:6379
     volumes:
-      - ./config/redis.conf:/redis.conf
+      - ./config-redis/redis.conf:/redis.conf
     command: [ "redis-server", "/redis.conf" ]
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=pdi_test
+    ports:
+      - 5432:5432
+    volumes:
+      - ./config-postgres/postgres.conf:/etc/postgresql/9.6/main/postgresql.conf
+      - ./config-postgres/pg_hba.conf:/etc/postgresql/9.6/main/pg_hba.conf

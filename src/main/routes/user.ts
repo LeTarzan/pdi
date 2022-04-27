@@ -5,4 +5,7 @@ import { makeLoadUserByEmailController } from '../factories/controllers/load-use
 export default (router: Router): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   router.get('/user/load-by-email/:email', adapterRoute(makeLoadUserByEmailController()))
+  router.get('/healthcheck', (req, res) => {
+    res.send('OK')
+  })
 }

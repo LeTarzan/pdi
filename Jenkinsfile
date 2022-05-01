@@ -5,7 +5,7 @@ pipeline {
     stage ('Build Image') {
       steps {
         script {
-          dockerapp = docker.build("letarzan/api-clean-node", '-f ./Dockerfile .')
+          dockerapp = docker.build("letarzan/pdi:${env.BUILD_ID}", '-f ./Dockerfile .')
         }
       }
     }
@@ -14,6 +14,7 @@ pipeline {
         script {
           docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
             dockerapp.push('latest')
+            dockerapp.push("${env.BUILD_ID}-latest")
           }
         }
       }

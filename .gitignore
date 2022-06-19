@@ -4,3 +4,8 @@ coverage
 config-redis
 config-postgres
 .env
+docker
+
+terraform/.terraform
+# used to set values to terraform
+terraform.tfvars 

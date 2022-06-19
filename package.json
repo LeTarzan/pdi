@@ -16,7 +16,8 @@
     "test:verbose": "npm run up:redis && jest --runInBand --passWithNoTests",
     "test:unit": "npm test -- --watch -c ./jest.unit.config.js",
     "test:integration": "npm test -- --watch -c ./jest.integration.config.js",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "tf:graph": "terraform graph | dot -Tsvg > ./terraform/graph.svg"
   },
   "keywords": [],
   "author": "",

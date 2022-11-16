@@ -7,5 +7,6 @@ export default (router: Router): void => {
   router.get('/user/load-by-email/:email', adapterRoute(makeLoadUserByEmailController()))
   router.get('/healthcheck', (req, res) => {
     res.send('OK')
+    res.end()
   })
 }

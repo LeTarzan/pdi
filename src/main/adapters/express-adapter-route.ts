@@ -18,5 +18,7 @@ export const adapterRoute = (controller: Controller) => {
         error: httpResponse.body.message
       })
     }
+
+    res.end()
   }
 }

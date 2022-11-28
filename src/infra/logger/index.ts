@@ -10,7 +10,12 @@ const destination = pino.destination({
 
 const logger = pino(
   {
-    timestamp: pino.stdTimeFunctions.isoTime
+    timestamp: pino.stdTimeFunctions.isoTime,
+    formatters: {
+      level (level) {
+        return { level }
+      }
+    }
   },
   destination)
 

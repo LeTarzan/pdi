@@ -1,4 +1,7 @@
+/* eslint-disable import/first */
 import 'reflect-metadata'
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 import { env } from './config/env'
 import { PgConnection } from './../infra/postgres/helpers'

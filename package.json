@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "cls-rtracer": "^2.6.2",
+    "dotenv": "^16.0.3",
     "express": "^4.17.2",
     "husky": "^7.0.4",
     "ioredis": "^4.28.2",

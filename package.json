@@ -12,12 +12,13 @@
     "lint:fix": "npm run lint -- --fix",
     "down": "docker-compose down",
     "up:redis": "docker-compose up -d redis",
-    "test": "npm run up:redis && jest --runInBand --passWithNoTests --silent --noStackTrace --forceExit",
-    "test:verbose": "npm run up:redis && jest --runInBand --passWithNoTests",
+    "test": "jest --runInBand --passWithNoTests --silent --noStackTrace --forceExit",
+    "test:verbose": "jest --runInBand --passWithNoTests",
     "test:unit": "npm test -- --watch -c ./jest.unit.config.js",
     "test:integration": "npm test -- --watch -c ./jest.integration.config.js",
     "prepare": "husky install",
-    "tf:graph": "terraform graph | dot -Tsvg > ./terraform/graph.svg"
+    "tf:graph": "terraform graph | dot -Tsvg > ./terraform/graph.svg",
+    "commit": "git-cz"
   },
   "keywords": [],
   "author": "",
@@ -34,26 +35,26 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.2.0",
     "eslint-plugin-standard": "^5.0.0",
-    "git-commit-msg-linter": "^4.0.7",
+    "git-cz": "^4.9.0",
     "jest": "^27.4.5",
     "jest-mock-extended": "^2.0.4",
     "nodemon": "^2.0.15",
-    "pg-mem": "1.9.17",
     "supertest": "^6.2.2",
     "ts-jest": "^27.1.2",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
   },
   "dependencies": {
+    "@instana/collector": "^2.15.0",
     "cls-rtracer": "^2.6.2",
     "dotenv": "^16.0.3",
     "express": "^4.17.2",
     "husky": "^7.0.4",
     "ioredis": "^4.28.2",
-    "pg": "^8.7.1",
+    "knex": "^2.4.2",
+    "pg": "^8.9.0",
     "pino": "^8.7.0",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "0.2.29",
     "uuid": "^9.0.0"
   }
 }

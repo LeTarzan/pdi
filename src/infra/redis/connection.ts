@@ -10,7 +10,7 @@ export class RedisConnection {
 
   static getClient (): Redis.Redis {
     if (RedisConnection.connection == null) {
-      RedisConnection.connection = new Redis(Number(env.redis.PORT), env.redis.HOST)
+      RedisConnection.connection = new Redis(env.redis.PORT, env.redis.HOST)
 
       RedisConnection.connection.on('error', (error: any) => {
         logError(error)

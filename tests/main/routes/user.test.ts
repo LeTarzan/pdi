@@ -1,29 +1,44 @@
+import { RedisRepository } from './../../../src/infra/redis'
 import { PgConnection } from './../../../src/infra/postgres/helpers/connection'
-import { Repository } from 'typeorm'
-import { PgUser } from './../../../src/infra/postgres/entities/user'
 import request from 'supertest'
 import { app } from '../../../src/main/config/app'
-import { makeFakeDb } from '../../infra/postgres/config'
-import { IBackup } from 'pg-mem'
+import { Knex } from 'knex'
+
+jest.mock('knex')
+jest.mock('./../../../src/infra/redis')
+
+const mockSet = jest.fn()
+const mockGet = jest.fn()
+RedisRepository.prototype.get = mockGet
+RedisRepository.prototype.set = mockSet
+
+const mockWhere = jest.fn()
+
+const QUERY_BUILDER = {
+  select: jest.fn().mockReturnThis(),
+  from: jest.fn().mockReturnThis(),
+  where: mockWhere
+}
+
+jest.spyOn(PgConnection, 'getConnection').mockResolvedValue(QUERY_BUILDER as unknown as Knex)
+
+const MOCK_USER = {
+  id: 1,
+  name: 'valid_name',
+  email: 'valid_email@mail.com'
+}
+
+const EXPECTED_RESULT = {
+  id: 1,
+  name: 'valid_name',
+  email: 'valid_email@mail.com'
+}
 
 describe('GET /user/load-by-email/:email', () => {
-  let backup: IBackup
-  let connection: PgConnection
-  let pgUserRepo: Repository<PgUser>
-
-  beforeAll(async () => {
-    connection = PgConnection.getInstance()
-    const db = await makeFakeDb([PgUser])
-    backup = db.backup()
-    pgUserRepo = connection.getRepository(PgUser)
-  })
-
-  afterAll(async () => {
-    await connection.disconnect()
-  })
-
-  beforeEach(() => {
-    backup.restore()
+  beforeEach(async () => {
+    mockSet.mockReset()
+    mockGet.mockReset()
+    mockWhere.mockReset()
   })
 
   it('should return 404 on load', async () => {
@@ -33,20 +48,20 @@ describe('GET /user/load-by-email/:email', () => {
     expect(status).toBe(404)
   })
 
-  it('should return 200 on load', async () => {
-    await pgUserRepo.save({
-      name: 'valid_name',
-      email: 'valid_email@mail.com'
-    })
+  it.each([
+    [null, MOCK_USER, EXPECTED_RESULT],
+    [MOCK_USER, null, EXPECTED_RESULT],
+    [MOCK_USER, MOCK_USER, EXPECTED_RESULT]
+  ])(
+    'should return 200, when cache is %o, db is %o',
+    async (cacheResult, dbResult, expectedResult) => {
+      mockWhere.mockResolvedValue([dbResult])
+      mockGet.mockResolvedValueOnce(cacheResult)
 
-    const { status, body } = await request(app)
-      .get('/user/load-by-email/valid_email@mail.com')
+      const { status, body } = await request(app)
+        .get('/user/load-by-email/valid_email@mail.com')
 
-    expect(status).toBe(200)
-    expect(body).toEqual({
-      id: 1,
-      name: 'valid_name',
-      email: 'valid_email@mail.com'
+      expect(status).toBe(200)
+      expect(body).toStrictEqual(expectedResult)
     })
-  })
 })

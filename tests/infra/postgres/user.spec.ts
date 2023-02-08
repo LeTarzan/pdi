@@ -1,11 +1,25 @@
-import { MockProxy, mock } from 'jest-mock-extended'
+import { Knex } from 'knex'
+import { RedisRepository } from './../../../src/infra/redis/index'
 import { PgUserRepository } from './../../../src/infra/postgres/repositories/user'
-import { PgUser } from './../../../src/infra/postgres/entities/user'
+import { PgConnection } from './../../../src/infra/postgres/helpers/'
 
-import { getConnection, getRepository, Repository } from 'typeorm'
-import { IBackup } from 'pg-mem'
-import { makeFakeDb } from './config'
-import { RedisRepositoy } from '../../data/contracts'
+jest.mock('knex')
+jest.mock('./../../../src/infra/redis/index')
+
+const mockSet = jest.fn()
+const mockGet = jest.fn()
+RedisRepository.prototype.get = mockGet
+RedisRepository.prototype.set = mockSet
+
+const mockWhere = jest.fn()
+
+const QUERY_BUILDER = {
+  select: jest.fn().mockReturnThis(),
+  from: jest.fn().mockReturnThis(),
+  where: mockWhere
+}
+
+jest.spyOn(PgConnection, 'getConnection').mockResolvedValue(QUERY_BUILDER as unknown as Knex)
 
 const VALID_EMAIL = 'valid_email@mail.com'
 
@@ -18,41 +32,29 @@ const EXPECTED_RESULT = {
 describe('PgUserRepository', () => {
   describe('loadByEmail', () => {
     let sut: PgUserRepository
-    let pgUserRepo: Repository<PgUser>
-    let backup: IBackup
-    let cache: MockProxy<RedisRepositoy>
 
     beforeAll(async () => {
-      const db = await makeFakeDb([PgUser])
-      backup = db.backup()
-      pgUserRepo = getRepository(PgUser)
       sut = new PgUserRepository()
-      cache = mock<RedisRepositoy>()
     })
 
-    beforeEach(() => {
-      backup.restore()
-    })
-
-    afterAll(async () => {
-      await getConnection().close()
+    beforeEach(async () => {
+      mockWhere.mockReset()
+      mockGet.mockReset()
     })
 
     it.each([
-      [VALID_EMAIL, null, EXPECTED_RESULT],
-      [VALID_EMAIL, EXPECTED_RESULT, EXPECTED_RESULT]
+      [VALID_EMAIL, null, 1, EXPECTED_RESULT],
+      [VALID_EMAIL, EXPECTED_RESULT, 0, EXPECTED_RESULT]
     ])(
       'when email is %s and the cache is %o, should returns %o',
-      async (email, cacheResult, expectedResult) => {
-        await pgUserRepo.save({
-          name: 'valid_name',
-          email
-        })
-        cache.get.mockResolvedValueOnce(cacheResult)
+      async (email, cacheResult, setCacheTimesCalled, expectedResult) => {
+        mockWhere.mockResolvedValue([expectedResult])
+        mockGet.mockResolvedValueOnce(cacheResult)
 
         const user = await sut.loadByEmail({ email })
 
         expect(user).toStrictEqual(expectedResult)
+        expect(mockSet).toHaveBeenCalledTimes(setCacheTimesCalled)
       })
 
     it('should return undefined user\'s email not exists', async () => {

@@ -4,31 +4,47 @@ services:
   app:
     build: .
     container_name: app
+    networks:
+      app-network:
+        aliases:
+          - app
     ports:
       - '3000:3000'
     volumes:
-      - ./dist:/app/dist
+      - ./dist:/dist
+    depends_on:
+      - postgres
+      - redis
+    links:
+      - postgres
+      - redis
   redis:
     container_name: redis
     image: redis:latest
+    networks:
+      app-network:
+        aliases:
+          - redis
     ports:
       - 6379:6379
     volumes:
-      - ./config-redis/redis.conf:/redis.conf
-    command: [ "redis-server", "/redis.conf" ]
+      - "./data:/data"
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
   postgres:
-    container_name: postgres
-    image: postgres:latest
+    image: postgres:14.1-alpine
     restart: always
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=pdi_test
+    networks:
+      app-network:
+        aliases:
+          - postgres
     ports:
-      - 5432:5432
-    volumes:
-      - ./config-postgres/postgres.conf:/etc/postgresql/9.6/main/postgresql.conf
-      - ./config-postgres/pg_hba.conf:/etc/postgresql/9.6/main/pg_hba.conf
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
   elasticsearch: # Remove SSL check | Add volume
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
@@ -51,3 +67,33 @@ services:
       ELASTICSEARCH_URL: http://localhost:9200/
     depends_on:
       - elasticsearch
+
+  agent:
+    image: icr.io/instana/agent:latest
+    pid: "host"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev:/dev
+      - /sys:/sys
+      - /var/log:/var/log
+    networks:
+      app-network:
+        aliases:
+          - instana-agent
+    links:
+      - redis
+      - postgres
+      - app
+    environment:
+      - INSTANA_AGENT_ENDPOINT=${INSTANA_AGENT_ENDPOINT}
+      - INSTANA_AGENT_ENDPOINT_PORT=${INSTANA_AGENT_ENDPOINT_PORT}
+      - INSTANA_AGENT_KEY=${INSTANA_AGENT_KEY}
+    expose:
+      - 42699
+
+networks:
+  app-network: {}
+volumes:
+  db:
+    driver: local

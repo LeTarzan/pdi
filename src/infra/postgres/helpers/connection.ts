@@ -1,36 +1,35 @@
-import {
-  Connection,
-  createConnection,
-  getConnection,
-  getRepository,
-  getConnectionManager, ObjectType, Repository
-} from 'typeorm'
+import { knex, Knex } from 'knex'
+import { env } from '../../../main/config/env'
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class PgConnection {
-  private static instance: PgConnection
-  private connection?: Connection
+  private static connection?: Knex
 
-  static getInstance (): PgConnection {
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    if (!PgConnection.instance) PgConnection.instance = new PgConnection()
-    return PgConnection.instance
+  static async getConnection (): Promise<Knex> {
+    if (!PgConnection.connection) await PgConnection.connect()
+
+    return PgConnection.connection as Knex
   }
 
-  async connect (): Promise<void> {
-    this.connection =
-    getConnectionManager().has('default')
-      ? getConnection()
-      : await createConnection()
-  }
-
-  async disconnect (): Promise<void> {
-    if (this.connection != null) {
-      await getConnection().close()
-      this.connection = undefined
+  static async connect (): Promise<void> {
+    if (!PgConnection.connection) {
+      PgConnection.connection = await knex({
+        client: 'pg',
+        connection: {
+          host: env.postgres.host,
+          port: env.postgres.port,
+          user: env.postgres.user,
+          password: env.postgres.password,
+          database: env.postgres.database
+        }
+      })
     }
   }
 
-  getRepository<Entity>(entity: ObjectType<Entity>): Repository<Entity> {
-    return getRepository(entity)
+  static async disconnect (): Promise<void> {
+    if (PgConnection.connection != null) {
+      await PgConnection.connection.destroy()
+      PgConnection.connection = undefined
+    }
   }
 }

@@ -31,7 +31,7 @@ export const logInfo = (message: any): void => {
 }
 
 export const logError = (message: any): void => {
-  logger.error(getExtraInfo(), message)
+  logger.error(getExtraInfo({ stack: message.stack }), message.message)
 }
 
 export const logRequest = (request: Request, response: Response, next: NextFunction): void => {
